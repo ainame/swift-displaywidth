@@ -11,7 +11,7 @@ enum BinarySearch {
             let mid = (low + high) / 2
             let interval = table[mid]
 
-            if interval.upperBound < value {
+            if interval.upperBound <= value {
                 low = mid + 1
             } else if interval.lowerBound > value {
                 high = mid - 1

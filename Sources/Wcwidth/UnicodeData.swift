@@ -1,5 +1,5 @@
-struct UnicodeData {
-    static func generalCategory(for codepoint: UInt32) -> GeneralCategory? {
+package struct UnicodeData {
+    package static func generalCategory(for codepoint: UInt32) -> GeneralCategory? {
         // Check each category using binary search - order matters for performance
         if BinarySearch.find(codepoint, in: lu) { return .uppercaseLetter }
         if BinarySearch.find(codepoint, in: ll) { return .lowercaseLetter }
@@ -33,7 +33,7 @@ struct UnicodeData {
         return nil
     }
 
-    static func generalCategory(for scalar: UnicodeScalar) -> GeneralCategory? {
+    package static func generalCategory(for scalar: UnicodeScalar) -> GeneralCategory? {
         return generalCategory(for: scalar.value)
     }
 
@@ -52,7 +52,7 @@ struct UnicodeData {
         return eastAsianWidth(for: scalar.value)
     }
 
-    static func isGeneralCategory(of codepoint: UInt32, _ category: GeneralCategory) -> Bool {
+    package static func isGeneralCategory(of codepoint: UInt32, _ category: GeneralCategory) -> Bool {
         switch category {
         case .uppercaseLetter: return BinarySearch.find(codepoint, in: lu)
         case .lowercaseLetter: return BinarySearch.find(codepoint, in: ll)

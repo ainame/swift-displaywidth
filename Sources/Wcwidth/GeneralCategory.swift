@@ -1,4 +1,4 @@
-enum GeneralCategory: String, CaseIterable {
+package enum GeneralCategory: String, CaseIterable {
     case uppercaseLetter        // Lu - Letter, Uppercase
     case lowercaseLetter        // Ll - Letter, Lowercase
     case titlecaseLetter        // Lt - Letter, Titlecase
