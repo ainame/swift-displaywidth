@@ -159,8 +159,6 @@ struct Command {
 // Unicode Version \(unicodeVersion)
 // This file contains only pure Unicode data tables
 
-import Foundation
-
 extension UnicodeData {
 
 """

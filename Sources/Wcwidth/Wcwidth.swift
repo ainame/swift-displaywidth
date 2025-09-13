@@ -1,5 +1,3 @@
-// Foundation not required for public API or width logic
-
 public struct Wcwidth: Hashable, Sendable {
     private let treatAmbiguousAsFullWidth: Bool
 
