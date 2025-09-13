@@ -39,6 +39,6 @@ let wcwidth = Wcwidth(treatAmbiguousAsFullWidth: true)
 
 * Naming reference https://man7.org/linux/man-pages/man3/wcwidth.3.html
 * Other langs
-   * https://github.com/jquast/wcwidth
-   * https://github.com/mattn/go-runewidth/
-   * https://github.com/komagata/eastasianwidth/
+   * Python https://github.com/jquast/wcwidth
+   * Go https://github.com/mattn/go-runewidth/
+   * JS https://github.com/komagata/eastasianwidth/
