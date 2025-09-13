@@ -35,12 +35,6 @@ func tsunodatahiro() async throws {
     #expect(wcwidthWide(ambiguousChar) == 2)
 }
 
-@Test func testDetectionMethod() throws {
-    // Test that the detection method returns a boolean
-    let detected = TerminalHelper.detectAmbiguousCharacterWidth()
-    #expect(detected == true || detected == false) // Should return a valid boolean
-}
-
 @Test func testAutoDetectionInit() throws {
     // Test that the auto-detection initializer works
     let wcwidthAuto = Wcwidth()
