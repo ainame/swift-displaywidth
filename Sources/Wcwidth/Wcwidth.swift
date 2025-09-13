@@ -65,49 +65,32 @@ public struct Wcwidth: Hashable, Sendable {
         }
     }
 
-    public func callAsFunction(_ character: Character) -> Int? {
-        // Handle single Unicode scalar characters
+    public func callAsFunction(_ character: Character) -> Int {
+        // Fast path for single-scalar characters
         if character.unicodeScalars.count == 1,
            let scalar = character.unicodeScalars.first {
             return callAsFunction(scalar)
         }
 
-        // For characters with multiple scalars (like combining characters),
-        // we need to handle them differently
-        var totalWidth = 0
-        var hasBaseCharacter = false
-
+        // For multi-scalar grapheme clusters, approximate the visual width as the
+        // maximum width of any scalar in the cluster. This:
+        // - yields 2 for emoji/ZWJ/flag sequences
+        // - yields 1 for base+combining marks (combining marks are width 0)
+        // - yields 0 if the cluster contains only zero-width marks
+        var maxWidth = 0
         for scalar in character.unicodeScalars {
-            // Check if this is a combining character
-            if UnicodeData.isGeneralCategory(of: scalar, .nonspacingMark) ||
-               UnicodeData.isGeneralCategory(of: scalar, .enclosingMark) ||
-               UnicodeData.isGeneralCategory(of: scalar, .spacingCombiningMark) {
-                // Combining characters don't add to width
-                continue
-            }
-
-            if !hasBaseCharacter {
-                totalWidth += callAsFunction(scalar)
-                hasBaseCharacter = true
-            } else {
-                // Multiple non-combining characters - this is complex
-                return nil
-            }
+            let w = callAsFunction(scalar)
+            if w > maxWidth { maxWidth = w }
+            if maxWidth == 2 { break } // early-exit: cannot exceed 2 in our model
         }
-
-        return totalWidth
+        return maxWidth
     }
 
-    public func callAsFunction(_ string: String) -> Int? {
+    public func callAsFunction(_ string: String) -> Int {
         var totalWidth = 0
-
         for character in string {
-            guard let charWidth = callAsFunction(character) else {
-                return nil
-            }
-            totalWidth += charWidth
+            totalWidth += callAsFunction(character)
         }
-
         return totalWidth
     }
 }
