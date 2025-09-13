@@ -14,7 +14,7 @@ Add to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/ainame/swift-wcwidth", from: "0.1.0")
+    .package(url: "https://github.com/ainame/swift-wcwidth", from: "0.0.2")
 ]
 ```
 
@@ -23,10 +23,22 @@ Then:
 ```swift
 import Wcwidth
 
-let wc = Wcwidth(treatAmbiguousAsFullWidth: false)
-wc("A")        // 1
-wc("中")        // 2
-wc("👩‍💻")       // 2
-wc("e\u{0301}") // 1 (e + combining acute)
+// call as function
+let wcwidth = Wcwidth()
+wcwidth("A")        // 1
+wcwidth("あ")       // 2
+wcwidth("👩‍💻")       // 2
+wcwidth("e\u{0301}") // 1 (e + combining acute)
+
+// If your environment treat ambiguous chars as full-width,
+// you can set this option.
+let wcwidth = Wcwidth(treatAmbiguousAsFullWidth: true)
 ```
 
+## Links
+
+* Naming reference https://man7.org/linux/man-pages/man3/wcwidth.3.html
+* Other langs
+   * https://github.com/jquast/wcwidth
+   * https://github.com/mattn/go-runewidth/
+   * https://github.com/komagata/eastasianwidth/

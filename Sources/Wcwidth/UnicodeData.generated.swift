@@ -2,7 +2,7 @@
 // Unicode Version 17.0.0
 // This file contains only pure Unicode data tables
 
-import Foundation
+// This file is pure data tables; no Foundation needed
 
 extension UnicodeData {
 
