@@ -3,7 +3,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "swift-wcwidth",
+    name: "swift-displaywidth",
     platforms: [
         .macOS(.v12),
         .iOS(.v15),
@@ -12,8 +12,8 @@ let package = Package(
     ],
     products: [
         .library(
-            name: "Wcwidth",
-            targets: ["Wcwidth"]
+            name: "DisplayWidth",
+            targets: ["DisplayWidth"]
         ),
         .executable(
           name: "generate",
@@ -22,14 +22,14 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "Wcwidth"
+            name: "DisplayWidth"
         ),
         .executableTarget(
           name: "Generate"
         ),
         .testTarget(
-            name: "WcwidthTests",
-            dependencies: ["Wcwidth"]
+            name: "DisplayWidthTests",
+            dependencies: ["DisplayWidth"]
         ),
     ]
 )

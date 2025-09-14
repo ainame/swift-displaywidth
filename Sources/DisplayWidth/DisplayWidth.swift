@@ -1,4 +1,4 @@
-public struct Wcwidth: Hashable, Sendable {
+public struct DisplayWidth: Hashable, Sendable {
     private let treatAmbiguousAsFullWidth: Bool
 
     public init(treatAmbiguousAsFullWidth: Bool = false) {

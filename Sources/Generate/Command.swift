@@ -282,7 +282,7 @@ extension UnicodeData {
     }
 
     static func writeGeneratedFile(content: String) throws {
-        let url = URL(fileURLWithPath: "Sources/Wcwidth/UnicodeData.generated.swift")
+        let url = URL(fileURLWithPath: "Sources/DisplayWidth/UnicodeData.generated.swift")
         try content.write(to: url, atomically: true, encoding: .utf8)
     }
 }

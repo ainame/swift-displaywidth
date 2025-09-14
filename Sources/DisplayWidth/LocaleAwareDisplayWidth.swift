@@ -1,12 +1,12 @@
 #if canImport(Foundation)
 import Foundation
 
-public struct LocaleAwareWcwidth: Hashable, Sendable {
-    private let wcwidth: Wcwidth
+public struct LocaleAwareDisplayWidth: Hashable, Sendable {
+    private let displayWidth: DisplayWidth
 
     public init(locale: Locale = Locale.current) {
         let treatAmbiguousAsFullWidth = Self.isEastAsianLocale(locale)
-        self.wcwidth = Wcwidth(treatAmbiguousAsFullWidth: treatAmbiguousAsFullWidth)
+        self.displayWidth = DisplayWidth(treatAmbiguousAsFullWidth: treatAmbiguousAsFullWidth)
     }
 
     private static func isEastAsianLocale(_ locale: Locale) -> Bool {
@@ -26,15 +26,15 @@ public struct LocaleAwareWcwidth: Hashable, Sendable {
     }
 
     public func callAsFunction(_ scalar: Unicode.Scalar) -> Int {
-        return wcwidth(scalar)
+        return displayWidth(scalar)
     }
 
     public func callAsFunction(_ character: Character) -> Int {
-        return wcwidth(character)
+        return displayWidth(character)
     }
 
     public func callAsFunction(_ string: String) -> Int {
-        return wcwidth(string)
+        return displayWidth(string)
     }
 }
 #endif
