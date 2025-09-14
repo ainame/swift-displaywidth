@@ -145,6 +145,93 @@ func tsunodatahiro() async throws {
     #expect(displayWidth("🎯") == 2) // Target
 }
 
+@Test func testWideSymbolsWithNeutralCategory() throws {
+    let displayWidth = DisplayWidth()
+
+    // Miscellaneous Symbols (2600-26FF) - These are neutral but should be wide
+    #expect(displayWidth("☀") == 2) // Black sun with rays (U+2600)
+    #expect(displayWidth("☁") == 2) // Cloud (U+2601)
+    #expect(displayWidth("☂") == 2) // Umbrella (U+2602)
+    #expect(displayWidth("☃") == 2) // Snowman (U+2603)
+    #expect(displayWidth("☄") == 2) // Comet (U+2604)
+    #expect(displayWidth("☔") == 2) // Umbrella with rain drops (U+2614)
+    #expect(displayWidth("☕") == 2) // Hot beverage (U+2615)
+    #expect(displayWidth("☘") == 2) // Shamrock (U+2618)
+    #expect(displayWidth("☙") == 2) // Reversed rotated floral heart bullet (U+2619)
+    #expect(displayWidth("☚") == 2) // Black left pointing index (U+261A)
+    #expect(displayWidth("☛") == 2) // Black right pointing index (U+261B)
+
+    // Dingbats (2700-27BF) - These are neutral but should be wide
+    #expect(displayWidth("✀") == 2) // Black scissors (U+2700)
+    #expect(displayWidth("✁") == 2) // Upper blade scissors (U+2701)
+    #expect(displayWidth("✂") == 2) // Black scissors (U+2702)
+    #expect(displayWidth("✃") == 2) // Lower blade scissors (U+2703)
+    #expect(displayWidth("✄") == 2) // White scissors (U+2704)
+    #expect(displayWidth("✅") == 2) // White heavy check mark (U+2705)
+    #expect(displayWidth("✆") == 2) // Telephone location sign (U+2706)
+    #expect(displayWidth("✇") == 2) // Tape drive (U+2707)
+    #expect(displayWidth("✈") == 2) // Airplane (U+2708)
+    #expect(displayWidth("✉") == 2) // Envelope (U+2709)
+    #expect(displayWidth("✊") == 2) // Raised fist (U+270A)
+    #expect(displayWidth("✋") == 2) // Raised hand (U+270B)
+    #expect(displayWidth("✌") == 2) // Victory hand (U+270C)
+    #expect(displayWidth("✍") == 2) // Writing hand (U+270D)
+    #expect(displayWidth("✎") == 2) // Lower right pencil (U+270E)
+    #expect(displayWidth("✏") == 2) // Pencil (U+270F)
+
+    // Stars and special symbols from 2B50-2B59
+    #expect(displayWidth("⭐") == 2) // White medium star (U+2B50)
+    #expect(displayWidth("⭑") == 2) // Black small star (U+2B51)
+    #expect(displayWidth("⭒") == 2) // White small star (U+2B52)
+    #expect(displayWidth("⭓") == 2) // Black right-pointing pentagon (U+2B53)
+    #expect(displayWidth("⭔") == 2) // White right-pointing pentagon (U+2B54)
+
+    // Special symbols that should be wide
+    #expect(displayWidth("〰") == 2) // Wavy dash (U+3030)
+    #expect(displayWidth("㊗") == 2) // Circled ideograph congratulation (U+3297)
+    #expect(displayWidth("㊙") == 2) // Circled ideograph secret (U+3299)
+
+    // Centreline symbols (FE4E-FE4F)
+    #expect(displayWidth("﹎") == 2) // Centreline low line (U+FE4E)
+    #expect(displayWidth("﹏") == 2) // Centreline overline (U+FE4F)
+}
+
+@Test func testNeutralEmojisFromSpecialRanges() throws {
+    let displayWidth = DisplayWidth()
+
+    // Mahjong Tiles (1F000-1F02F) - neutral but should be wide
+    #expect(displayWidth("🀀") == 2) // Mahjong tile east wind (U+1F000)
+    #expect(displayWidth("🀁") == 2) // Mahjong tile south wind (U+1F001)
+    #expect(displayWidth("🀂") == 2) // Mahjong tile west wind (U+1F002)
+    #expect(displayWidth("🀃") == 2) // Mahjong tile north wind (U+1F003)
+    #expect(displayWidth("🀄") == 2) // Mahjong tile red dragon (U+1F004)
+    #expect(displayWidth("🀅") == 2) // Mahjong tile green dragon (U+1F005)
+    #expect(displayWidth("🀆") == 2) // Mahjong tile white dragon (U+1F006)
+
+    // Domino Tiles (1F030-1F09F) - neutral but should be wide
+    #expect(displayWidth("🀰") == 2) // Domino tile horizontal back (U+1F030)
+    #expect(displayWidth("🀱") == 2) // Domino tile horizontal-00-00 (U+1F031)
+    #expect(displayWidth("🀲") == 2) // Domino tile horizontal-00-01 (U+1F032)
+    #expect(displayWidth("🀳") == 2) // Domino tile horizontal-00-02 (U+1F033)
+    #expect(displayWidth("🀴") == 2) // Domino tile horizontal-00-03 (U+1F034)
+    #expect(displayWidth("🀵") == 2) // Domino tile horizontal-00-04 (U+1F035)
+    #expect(displayWidth("🀶") == 2) // Domino tile horizontal-00-05 (U+1F036)
+
+    // Playing Cards (1F0A0-1F0FF) - neutral but should be wide
+    #expect(displayWidth("🂠") == 2) // Playing card back (U+1F0A0)
+    #expect(displayWidth("🂡") == 2) // Playing card ace of spades (U+1F0A1)
+    #expect(displayWidth("🂢") == 2) // Playing card two of spades (U+1F0A2)
+    #expect(displayWidth("🂣") == 2) // Playing card three of spades (U+1F0A3)
+    #expect(displayWidth("🂤") == 2) // Playing card four of spades (U+1F0A4)
+    #expect(displayWidth("🂥") == 2) // Playing card five of spades (U+1F0A5)
+    #expect(displayWidth("🂦") == 2) // Playing card six of spades (U+1F0A6)
+
+    // Enclosed Ideographic Supplement (1F200-1F2FF) - testing specific chars that work
+    #expect(displayWidth("🈀") == 2) // Square hiragana hoka (U+1F200)
+    #expect(displayWidth("🈁") == 2) // Square katakana koko (U+1F201)
+    #expect(displayWidth("🈂") == 2) // Squared katakana sa (U+1F202)
+}
+
 @Test func testEdgeCases() throws {
     let displayWidth = DisplayWidth()
 
