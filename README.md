@@ -6,7 +6,26 @@
 [![GitHub Release](https://img.shields.io/github/v/release/ainame/swift-displaywidth)](https://github.com/ainame/swift-displaywidth/releases)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/ainame/swift-displaywidth/ci.yml?branch=main)](https://github.com/ainame/swift-displaywidth/actions)
 
-Small, testable display width implementation in Swift. Provides simple functions to measure display width of Unicode scalars, characters, and strings with an option to treat East Asian "Ambiguous" width as full-width.
+A portable/cross-platform implementation of `wcwidth(3)` with up-to-date Unicode spec.
+This project has own Unicode data tables generated from following files.
+
+* https://unicode.org/Public/17.0.0/ucd/UnicodeData.txt
+* https://unicode.org/Public/17.0.0/ucd/EastAsianWidth.txt
+
+## Why use this?
+
+Instead of this library, there's `wcwidth` imported with `import Darwin`, `import Musl`, or `import Glibc`.
+
+- https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/wcwidth.3.html
+- https://www.gnu.org/software/gnulib/manual/html_node/wcwidth.html
+- https://git.musl-libc.org/cgit/musl/tree/src/ctype/wcwidth.c
+
+If that meets your requirements, you should just use it. However, this project has following superior points.
+
+- Portable/Cross-platform implementation that doesn't require a C library nor even Foundation
+- Up-to-date Unicode spec
+- Better support of Unicode grapheme clusters
+- Swift-friendly API
 
 ## Usage
 
@@ -14,7 +33,7 @@ Add to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/ainame/swift-displaywidth", from: "0.0.2")
+    .package(url: "https://github.com/ainame/swift-displaywidth", from: "0.0.3")
 ]
 ```
 
@@ -37,8 +56,10 @@ let displayWidth = DisplayWidth(treatAmbiguousAsFullWidth: true)
 
 ## Links
 
-* Naming reference https://man7.org/linux/man-pages/man3/wcwidth.3.html
+* https://man7.org/linux/man-pages/man3/wcwidth.3.html
 * Other langs
    * Python https://github.com/jquast/wcwidth
    * Go https://github.com/mattn/go-runewidth/
    * JS https://github.com/komagata/eastasianwidth/
+* https://emonkak.pages.dev/articles/wcwidth/
+   * This project (to avoid using `wcwidth(3)`) is against to this blog post but I took ideas around full-width symbols
