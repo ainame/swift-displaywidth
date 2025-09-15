@@ -5,31 +5,25 @@ public struct DisplayWidth: Hashable, Sendable {
         self.treatAmbiguousAsFullWidth = treatAmbiguousAsFullWidth
     }
 
-    private func isWideSymbolOrEmoji(_ codePoint: UInt32) -> Bool {
-        // Comprehensive emoji and symbol ranges that should be wide
-        return (codePoint >= 0x1F000 && codePoint <= 0x1F02F) ||  // Mahjong Tiles
-               (codePoint >= 0x1F030 && codePoint <= 0x1F09F) ||  // Domino Tiles
-               (codePoint >= 0x1F0A0 && codePoint <= 0x1F0FF) ||  // Playing Cards
-               (codePoint >= 0x1F100 && codePoint <= 0x1F1FF) ||  // Enclosed Alphanumeric Supplement
-               (codePoint >= 0x1F200 && codePoint <= 0x1F2FF) ||  // Enclosed Ideographic Supplement
-               (codePoint >= 0x1F300 && codePoint <= 0x1F5FF) ||  // Miscellaneous Symbols and Pictographs
-               (codePoint >= 0x1F600 && codePoint <= 0x1F64F) ||  // Emoticons
-               (codePoint >= 0x1F650 && codePoint <= 0x1F67F) ||  // Ornamental Dingbats
-               (codePoint >= 0x1F680 && codePoint <= 0x1F6FF) ||  // Transport and Map Symbols
-               (codePoint >= 0x1F700 && codePoint <= 0x1F77F) ||  // Alchemical Symbols
-               (codePoint >= 0x1F780 && codePoint <= 0x1F7FF) ||  // Geometric Shapes Extended
-               (codePoint >= 0x1F800 && codePoint <= 0x1F8FF) ||  // Supplemental Arrows-C
-               (codePoint >= 0x1F900 && codePoint <= 0x1F9FF) ||  // Supplemental Symbols and Pictographs
-               (codePoint >= 0x1FA00 && codePoint <= 0x1FA6F) ||  // Chess Symbols
-               (codePoint >= 0x1FA70 && codePoint <= 0x1FAFF) ||  // Symbols and Pictographs Extended-A
-               (codePoint >= 0x2600 && codePoint <= 0x26FF) ||   // Miscellaneous Symbols
-               (codePoint >= 0x2700 && codePoint <= 0x27BF) ||   // Dingbats
-               (codePoint >= 0x2B50 && codePoint <= 0x2B59) ||   // Stars and other symbols
-               (codePoint >= 0x3030 && codePoint <= 0x3030) ||   // Wavy dash
-               (codePoint >= 0x3297 && codePoint <= 0x3297) ||   // Circled ideograph congratulation
-               (codePoint >= 0x3299 && codePoint <= 0x3299) ||   // Circled ideograph secret
-               (codePoint >= 0xFE4E && codePoint <= 0xFE4F)      // Centreline symbols
+    public func callAsFunction(_ string: String) -> Int {
+        var totalWidth = 0
+        for character in string {
+            totalWidth += callAsFunction(character)
+        }
+        return totalWidth
     }
+
+    public func callAsFunction(_ character: Character) -> Int {
+        // Fast path for single-scalar characters
+        if character.unicodeScalars.count == 1,
+           let scalar = character.unicodeScalars.first {
+            return callAsFunction(scalar)
+        }
+
+        // Handle complex grapheme clusters
+        return calculateGraphemeClusterWidth(character)
+    }
+
 
     public func callAsFunction(_ scalar: Unicode.Scalar) -> Int {
         let codePoint = scalar.value
@@ -87,15 +81,30 @@ public struct DisplayWidth: Hashable, Sendable {
         }
     }
 
-    public func callAsFunction(_ character: Character) -> Int {
-        // Fast path for single-scalar characters
-        if character.unicodeScalars.count == 1,
-           let scalar = character.unicodeScalars.first {
-            return callAsFunction(scalar)
-        }
-
-        // Handle complex grapheme clusters
-        return calculateGraphemeClusterWidth(character)
+    private func isWideSymbolOrEmoji(_ codePoint: UInt32) -> Bool {
+        // Comprehensive emoji and symbol ranges that should be wide
+        return (codePoint >= 0x1F000 && codePoint <= 0x1F02F) ||  // Mahjong Tiles
+               (codePoint >= 0x1F030 && codePoint <= 0x1F09F) ||  // Domino Tiles
+               (codePoint >= 0x1F0A0 && codePoint <= 0x1F0FF) ||  // Playing Cards
+               (codePoint >= 0x1F100 && codePoint <= 0x1F1FF) ||  // Enclosed Alphanumeric Supplement
+               (codePoint >= 0x1F200 && codePoint <= 0x1F2FF) ||  // Enclosed Ideographic Supplement
+               (codePoint >= 0x1F300 && codePoint <= 0x1F5FF) ||  // Miscellaneous Symbols and Pictographs
+               (codePoint >= 0x1F600 && codePoint <= 0x1F64F) ||  // Emoticons
+               (codePoint >= 0x1F650 && codePoint <= 0x1F67F) ||  // Ornamental Dingbats
+               (codePoint >= 0x1F680 && codePoint <= 0x1F6FF) ||  // Transport and Map Symbols
+               (codePoint >= 0x1F700 && codePoint <= 0x1F77F) ||  // Alchemical Symbols
+               (codePoint >= 0x1F780 && codePoint <= 0x1F7FF) ||  // Geometric Shapes Extended
+               (codePoint >= 0x1F800 && codePoint <= 0x1F8FF) ||  // Supplemental Arrows-C
+               (codePoint >= 0x1F900 && codePoint <= 0x1F9FF) ||  // Supplemental Symbols and Pictographs
+               (codePoint >= 0x1FA00 && codePoint <= 0x1FA6F) ||  // Chess Symbols
+               (codePoint >= 0x1FA70 && codePoint <= 0x1FAFF) ||  // Symbols and Pictographs Extended-A
+               (codePoint >= 0x2600 && codePoint <= 0x26FF) ||   // Miscellaneous Symbols
+               (codePoint >= 0x2700 && codePoint <= 0x27BF) ||   // Dingbats
+               (codePoint >= 0x2B50 && codePoint <= 0x2B59) ||   // Stars and other symbols
+               (codePoint >= 0x3030 && codePoint <= 0x3030) ||   // Wavy dash
+               (codePoint >= 0x3297 && codePoint <= 0x3297) ||   // Circled ideograph congratulation
+               (codePoint >= 0x3299 && codePoint <= 0x3299) ||   // Circled ideograph secret
+               (codePoint >= 0xFE4E && codePoint <= 0xFE4F)      // Centreline symbols
     }
 
     private func calculateGraphemeClusterWidth(_ character: Character) -> Int {
@@ -135,13 +144,5 @@ public struct DisplayWidth: Hashable, Sendable {
                    codePoint == 0x200D || // ZWJ
                    codePoint == 0xFE0F    // Emoji variation selector
         }
-    }
-
-    public func callAsFunction(_ string: String) -> Int {
-        var totalWidth = 0
-        for character in string {
-            totalWidth += callAsFunction(character)
-        }
-        return totalWidth
     }
 }
