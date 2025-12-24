@@ -10,8 +10,7 @@ public struct LocaleAwareDisplayWidth: Hashable, Sendable {
     }
 
     private static func isEastAsianLocale(_ locale: Locale) -> Bool {
-        // Use the older API that's compatible with earlier macOS versions
-        guard let languageCode = locale.languageCode else {
+        guard let languageCode = locale.language.languageCode?.identifier else {
             return false
         }
 
