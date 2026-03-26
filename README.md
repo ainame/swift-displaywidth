@@ -1,6 +1,6 @@
 # swift-displaywidth
 
-[![Swift Version](https://img.shields.io/badge/Swift-6.1%2B-blue.svg)](https://swift.org)
+[![Swift Version](https://img.shields.io/badge/Swift-6.0%2B-blue.svg)](https://swift.org)
 [![Swift Package Manager](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://swift.org/package-manager/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/ainame/swift-displaywidth/blob/main/LICENSE)
 [![GitHub Release](https://img.shields.io/github/v/release/ainame/swift-displaywidth)](https://github.com/ainame/swift-displaywidth/releases)

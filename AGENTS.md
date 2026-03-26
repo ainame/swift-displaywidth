@@ -4,13 +4,13 @@
 
 A portable/cross-platform Swift implementation of `wcwidth(3)` that calculates display width of Unicode characters and strings. Uses up-to-date Unicode 17.0.0 spec with better grapheme cluster support than system `wcwidth`. No dependencies on C libraries or Foundation (except for locale-aware variant).
 
-**Swift Version**: 6.2 (see `.swift-version`)
+**Swift Version**: 6.0 (see `.swift-version`)
 
-**Platforms**: macOS 12+, iOS 15+, tvOS 15+, watchOS 8+
+**Platforms**: macOS 13+, iOS 16+, tvOS 16+, watchOS 9+
 
 ## Project Structure & Module Organization
 
-- `Package.swift` — SwiftPM manifest (Swift 6.1 tools-version).
+- `Package.swift` — SwiftPM manifest (Swift 6.0 tools-version).
 - `Sources/DisplayWidth/` — library source (public API and width logic).
 - `Sources/Generate/` — executable that fetches Unicode data and writes `Sources/DisplayWidth/UnicodeData.generated.swift`.
 - `Tests/DisplayWidthTests/` — tests using the Swift `Testing` library (`@Test`).
@@ -43,6 +43,7 @@ A portable/cross-platform Swift implementation of `wcwidth(3)` that calculates d
 **Locale-Aware Variant** (`LocaleAwareDisplayWidth.swift`):
 - Foundation-dependent wrapper
 - Auto-detects East Asian locales (ja, ko, zh) and sets `treatAmbiguousAsFullWidth: true`
+- Uses `Locale.Language` APIs directly, so the package requires iOS 16, tvOS 16, and watchOS 9 for this API surface
 
 ## Build, Test, and Development Commands
 
