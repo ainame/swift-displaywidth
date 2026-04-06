@@ -1,15 +1,56 @@
 public struct DisplayWidth: Hashable, Sendable {
     private let treatAmbiguousAsFullWidth: Bool
+    private let stripsANSI: Bool
+    private let tabWidth: Int?
 
-    public init(treatAmbiguousAsFullWidth: Bool = false) {
+    public init(
+        treatAmbiguousAsFullWidth: Bool = false,
+        stripsANSI: Bool = false,
+        tabWidth: Int? = nil
+    ) {
         self.treatAmbiguousAsFullWidth = treatAmbiguousAsFullWidth
+        self.stripsANSI = stripsANSI
+        self.tabWidth = tabWidth
     }
 
     public func callAsFunction(_ string: String) -> Int {
+        if !stripsANSI, tabWidth == nil {
+            return measurePlainString(string)
+        }
+
+        return measureProcessedString(string)
+    }
+
+    private func measurePlainString(_ string: String) -> Int {
         var totalWidth = 0
         for character in string {
             totalWidth += callAsFunction(character)
         }
+        return totalWidth
+    }
+
+    private func measureProcessedString(_ string: String) -> Int {
+        var totalWidth = 0
+        var index = string.startIndex
+
+        while index < string.endIndex {
+            if stripsANSI, let nextIndex = skipANSIEscapeSequence(in: string, from: index) {
+                index = nextIndex
+                continue
+            }
+
+            let character = string[index]
+            if let tabWidth, character == "\t" {
+                let remainder = totalWidth % tabWidth
+                totalWidth += remainder == 0 ? tabWidth : tabWidth - remainder
+                index = string.index(after: index)
+                continue
+            }
+
+            totalWidth += callAsFunction(character)
+            index = string.index(after: index)
+        }
+
         return totalWidth
     }
 
@@ -144,5 +185,61 @@ public struct DisplayWidth: Hashable, Sendable {
                    codePoint == 0x200D || // ZWJ
                    codePoint == 0xFE0F    // Emoji variation selector
         }
+    }
+
+    private func skipANSIEscapeSequence(in string: String, from start: String.Index) -> String.Index? {
+        guard string[start] == "\u{001B}" else {
+            return nil
+        }
+
+        let introducerIndex = string.index(after: start)
+        guard introducerIndex < string.endIndex else {
+            return nil
+        }
+
+        switch string[introducerIndex] {
+        case "[":
+            return skipControlSequenceIntroducer(in: string, from: string.index(after: introducerIndex))
+        case "]", "_":
+            return skipStringTerminatedEscape(in: string, from: string.index(after: introducerIndex))
+        default:
+            return nil
+        }
+    }
+
+    private func skipControlSequenceIntroducer(in string: String, from start: String.Index) -> String.Index? {
+        var index = start
+
+        while index < string.endIndex {
+            let scalar = string[index].unicodeScalars.first!.value
+            if scalar >= 0x40 && scalar <= 0x7E {
+                return string.index(after: index)
+            }
+            index = string.index(after: index)
+        }
+
+        return nil
+    }
+
+    private func skipStringTerminatedEscape(in string: String, from start: String.Index) -> String.Index? {
+        var index = start
+
+        while index < string.endIndex {
+            let character = string[index]
+            if character == "\u{0007}" {
+                return string.index(after: index)
+            }
+
+            if character == "\u{001B}" {
+                let next = string.index(after: index)
+                if next < string.endIndex, string[next] == "\\" {
+                    return string.index(after: next)
+                }
+            }
+
+            index = string.index(after: index)
+        }
+
+        return nil
     }
 }

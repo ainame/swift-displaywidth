@@ -247,3 +247,52 @@ func tsunodatahiro() async throws {
     // Strings with mixed widths
     #expect(displayWidth("Hello 世界 🌍") == 13) // "Hello" (5) + " " (1) + "世界" (4) + " " (1) + "🌍" (2) = 13
 }
+
+@Test func testDefaultInitializerRemainsBackwardCompatible() throws {
+    let displayWidth = DisplayWidth()
+    #expect(displayWidth("A\tB") == 2)
+    #expect(displayWidth("\u{001B}[31mhello\u{001B}[0m") == 12)
+}
+
+@Test func testANSIStringProcessing() throws {
+    let raw = "\u{001B}[31mhello\u{001B}[0m"
+    #expect(DisplayWidth(stripsANSI: false)(raw) == 12)
+    #expect(DisplayWidth(stripsANSI: true)(raw) == 5)
+}
+
+@Test func testANSIStringProcessingSupportsOSCAndAPC() throws {
+    let oscBEL = "\u{001B}]133;A\u{0007}hello\u{001B}]133;B\u{0007}"
+    let oscST = "\u{001B}]133;A\u{001B}\\hello\u{001B}]133;B\u{001B}\\"
+    let apcBEL = "\u{001B}_Ga=T,f=100;AAAA\u{0007}hello"
+    let apcST = "\u{001B}_Ga=T,f=100;AAAA\u{001B}\\hello"
+    let displayWidth = DisplayWidth(stripsANSI: true)
+
+    #expect(displayWidth(oscBEL) == 5)
+    #expect(displayWidth(oscST) == 5)
+    #expect(displayWidth(apcBEL) == 5)
+    #expect(displayWidth(apcST) == 5)
+}
+
+@Test func testMalformedANSISequenceDoesNotHangAndFallsBackToText() throws {
+    let malformed = "\u{001B}]133;Ahello"
+    #expect(DisplayWidth(stripsANSI: true)(malformed) == 11)
+}
+
+@Test func testTabWidthUsesTabStops() throws {
+    let displayWidth = DisplayWidth(tabWidth: 4)
+    #expect(displayWidth("a\tb") == 5)
+    #expect(displayWidth("abcd\tb") == 9)
+    #expect(displayWidth("ab\t中") == 6)
+}
+
+@Test func testStringProcessingMixedWithWideCharacters() throws {
+    let displayWidth = DisplayWidth(stripsANSI: true, tabWidth: 4)
+    let input = "\u{001B}[31m界\t👩‍💻\u{001B}[0m"
+    #expect(displayWidth(input) == 6)
+}
+
+@Test func testStringProcessingDoesNotAffectScalarOrCharacterMeasurement() throws {
+    let displayWidth = DisplayWidth(stripsANSI: true, tabWidth: 4)
+    #expect(displayWidth("\t" as Character) == 0)
+    #expect(displayWidth("\u{001B}") == 0)
+}
