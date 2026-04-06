@@ -1,21 +1,54 @@
 public struct DisplayWidth: Hashable, Sendable {
+    /// Controls how string measurement should count `\t`.
+    ///
+    /// Diagram with `n = 4`:
+    ///
+    /// - `.tabStops(4)`
+    ///   - tab stops are at columns `4, 8, 12, ...`
+    ///   - `"a\tb"` counts as `1 + 3 + 1 = 5`
+    ///   - `"ab\tb"` counts as `2 + 2 + 1 = 5`
+    ///   - `"abcd\tb"` counts as `4 + 4 + 1 = 9`
+    /// - `.fixedSpaces(4)`
+    ///   - every tab always counts as exactly `4`
+    ///   - `"a\tb"` counts as `1 + 4 + 1 = 6`
+    ///   - `"ab\tb"` counts as `2 + 4 + 1 = 7`
+    ///   - `"abcd\tb"` counts as `4 + 4 + 1 = 9`
+    ///
+    /// `.tabStops` matches terminal-style tab-stop behavior, while
+    /// `.fixedSpaces` matches downstream libraries that normalize each tab to a
+    /// fixed number of spaces before measuring.
+    ///
+    /// Reference:
+    /// https://en.wikipedia.org/wiki/Tab_stop
+    public enum Tab: Hashable, Sendable {
+        case tabStops(Int)
+        case fixedSpaces(Int)
+    }
+
     private let treatAmbiguousAsFullWidth: Bool
     private let stripsANSI: Bool
-    private let tabWidth: Int?
+    private let tab: Tab?
 
     public init(
         treatAmbiguousAsFullWidth: Bool = false,
         stripsANSI: Bool = false,
-        tabWidth: Int? = nil
+        tab: Tab? = nil
     ) {
-        precondition(tabWidth == nil || tabWidth! > 0, "tabWidth must be nil or greater than zero")
+        if let tab {
+            switch tab {
+            case let .tabStops(interval):
+                precondition(interval > 0, "tab.tabStops interval must be greater than zero")
+            case let .fixedSpaces(count):
+                precondition(count > 0, "tab.fixedSpaces count must be greater than zero")
+            }
+        }
         self.treatAmbiguousAsFullWidth = treatAmbiguousAsFullWidth
         self.stripsANSI = stripsANSI
-        self.tabWidth = tabWidth
+        self.tab = tab
     }
 
     public func callAsFunction(_ string: String) -> Int {
-        if !stripsANSI, tabWidth == nil {
+        if !stripsANSI, tab == nil {
             return measurePlainString(string)
         }
 
@@ -45,9 +78,8 @@ public struct DisplayWidth: Hashable, Sendable {
                 continue
             }
 
-            if let tabWidth, scalar.value == 0x09 {
-                let remainder = totalWidth % tabWidth
-                totalWidth += remainder == 0 ? tabWidth : tabWidth - remainder
+            if let tab, scalar.value == 0x09 {
+                totalWidth += widthForTab(tab, currentColumn: totalWidth)
                 scalarIndex = scalars.index(after: scalarIndex)
                 continue
             }
@@ -197,8 +229,18 @@ public struct DisplayWidth: Hashable, Sendable {
                codePoint == 0xFE0F    // Emoji variation selector
     }
 
+    private func widthForTab(_ tab: Tab, currentColumn: Int) -> Int {
+        switch tab {
+        case let .tabStops(interval):
+            let remainder = currentColumn % interval
+            return remainder == 0 ? interval : interval - remainder
+        case let .fixedSpaces(count):
+            return count
+        }
+    }
+
     private func isProcessingBoundary(_ scalar: UnicodeScalar) -> Bool {
-        (stripsANSI && scalar.value == 0x1B) || (tabWidth != nil && scalar.value == 0x09)
+        (stripsANSI && scalar.value == 0x1B) || (tab != nil && scalar.value == 0x09)
     }
 
     private func skipANSIEscapeSequence(

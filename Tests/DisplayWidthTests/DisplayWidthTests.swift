@@ -254,6 +254,11 @@ func tsunodatahiro() async throws {
     #expect(displayWidth("\u{001B}[31mhello\u{001B}[0m") == 12)
 }
 
+@Test func testTabInitializerSupportsBothModes() throws {
+    #expect(DisplayWidth(tab: .tabStops(4))("a\tb") == 5)
+    #expect(DisplayWidth(tab: .fixedSpaces(3))("a\tb") == 5)
+}
+
 @Test func testANSIStringProcessing() throws {
     let raw = "\u{001B}[31mhello\u{001B}[0m"
     #expect(DisplayWidth(stripsANSI: false)(raw) == 12)
@@ -286,21 +291,48 @@ func tsunodatahiro() async throws {
     #expect(DisplayWidth(stripsANSI: true)(malformed) == 11)
 }
 
-@Test func testTabWidthUsesTabStops() throws {
-    let displayWidth = DisplayWidth(tabWidth: 4)
+@Test func testTabStopsAdvanceToNextTabStop() throws {
+    let displayWidth = DisplayWidth(tab: .tabStops(4))
     #expect(displayWidth("a\tb") == 5)
     #expect(displayWidth("abcd\tb") == 9)
     #expect(displayWidth("ab\t中") == 6)
 }
 
+@Test func testFixedSpacesCountEachTabAsFixedWidth() throws {
+    let displayWidth = DisplayWidth(tab: .fixedSpaces(3))
+    #expect(displayWidth("a\tb") == 5)
+    #expect(displayWidth("abc\tb") == 7)
+    #expect(displayWidth("界\tb") == 6)
+}
+
+@Test func testTabStopsAndFixedSpacesCanDiverge() throws {
+    let tabStops = DisplayWidth(tab: .tabStops(3))
+    let fixedSpaces = DisplayWidth(tab: .fixedSpaces(3))
+
+    #expect(tabStops("a\tb") == 4)
+    #expect(fixedSpaces("a\tb") == 5)
+
+    #expect(tabStops("abc\tb") == 7)
+    #expect(fixedSpaces("abc\tb") == 7)
+
+    #expect(tabStops("界\tb") == 4)
+    #expect(fixedSpaces("界\tb") == 6)
+}
+
 @Test func testStringProcessingMixedWithWideCharacters() throws {
-    let displayWidth = DisplayWidth(stripsANSI: true, tabWidth: 4)
+    let displayWidth = DisplayWidth(stripsANSI: true, tab: .tabStops(4))
     let input = "\u{001B}[31m界\t👩‍💻\u{001B}[0m"
     #expect(displayWidth(input) == 6)
 }
 
+@Test func testStringProcessingMixedWithFixedSpacesTabs() throws {
+    let displayWidth = DisplayWidth(stripsANSI: true, tab: .fixedSpaces(3))
+    let input = "\u{001B}[31m界\t👩‍💻\u{001B}[0m"
+    #expect(displayWidth(input) == 7)
+}
+
 @Test func testStringProcessingDoesNotAffectScalarOrCharacterMeasurement() throws {
-    let displayWidth = DisplayWidth(stripsANSI: true, tabWidth: 4)
+    let displayWidth = DisplayWidth(stripsANSI: true, tab: .tabStops(4))
     #expect(displayWidth("\t" as Character) == 0)
     #expect(displayWidth(Unicode.Scalar(0x001B)!) == 0)
     #expect(displayWidth("\u{001B}") == 0)
