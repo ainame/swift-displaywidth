@@ -1,4 +1,6 @@
 public struct DisplayWidth: Hashable, Sendable {
+    // `.tabStops(n)` advances to the next multiple of `n`, while
+    // `.fixedSpaces(n)` counts every tab as exactly `n` columns.
     public enum Tab: Hashable, Sendable {
         case tabStops(Int)
         case fixedSpaces(Int)
