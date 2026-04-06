@@ -52,7 +52,18 @@ displayWidth("e\u{0301}") // 1 (e + combining acute)
 // If your environment treat ambiguous chars as full-width,
 // you can set this option.
 let displayWidth = DisplayWidth(treatAmbiguousAsFullWidth: true)
+
+// ANSI escape sequences can be ignored during string measurement.
+let ansiAwareDisplayWidth = DisplayWidth(stripsANSI: true)
+ansiAwareDisplayWidth("\u{001B}[31mhello\u{001B}[0m") // 5
+
+// Tabs can advance to real tab stops when measuring strings.
+let tabAwareDisplayWidth = DisplayWidth(tabWidth: 4)
+tabAwareDisplayWidth("a\tb") // 5
 ```
+
+`stripsANSI` and `tabWidth` affect string measurement only. Character and scalar
+measurement keep their existing behavior.
 
 ## Links
 
