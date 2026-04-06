@@ -76,6 +76,26 @@ terminal-style tab stops, while `.fixedSpaces(n)` counts each tab as exactly `n`
 columns. For example, with `3`, `"a\tb"` is width `4` with `.tabStops(3)` and
 width `5` with `.fixedSpaces(3)`.
 
+Diagram with `4`:
+
+```text
+.tabStops(4)
+tab stops: 4, 8, 12, ...
+
+"a\tb"    = 1 + 3 + 1 = 5
+"ab\tb"   = 2 + 2 + 1 = 5
+"abcd\tb" = 4 + 4 + 1 = 9
+
+.fixedSpaces(4)
+every tab = 4
+
+"a\tb"    = 1 + 4 + 1 = 6
+"ab\tb"   = 2 + 4 + 1 = 7
+"abcd\tb" = 4 + 4 + 1 = 9
+```
+
+Reference: [Tab stop](https://en.wikipedia.org/wiki/Tab_stop)
+
 ## Links
 
 * https://man7.org/linux/man-pages/man3/wcwidth.3.html

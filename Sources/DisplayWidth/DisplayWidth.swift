@@ -1,6 +1,25 @@
 public struct DisplayWidth: Hashable, Sendable {
-    // `.tabStops(n)` advances to the next multiple of `n`, while
-    // `.fixedSpaces(n)` counts every tab as exactly `n` columns.
+    /// Controls how string measurement should count `\t`.
+    ///
+    /// Diagram with `n = 4`:
+    ///
+    /// - `.tabStops(4)`
+    ///   - tab stops are at columns `4, 8, 12, ...`
+    ///   - `"a\tb"` counts as `1 + 3 + 1 = 5`
+    ///   - `"ab\tb"` counts as `2 + 2 + 1 = 5`
+    ///   - `"abcd\tb"` counts as `4 + 4 + 1 = 9`
+    /// - `.fixedSpaces(4)`
+    ///   - every tab always counts as exactly `4`
+    ///   - `"a\tb"` counts as `1 + 4 + 1 = 6`
+    ///   - `"ab\tb"` counts as `2 + 4 + 1 = 7`
+    ///   - `"abcd\tb"` counts as `4 + 4 + 1 = 9`
+    ///
+    /// `.tabStops` matches terminal-style tab-stop behavior, while
+    /// `.fixedSpaces` matches downstream libraries that normalize each tab to a
+    /// fixed number of spaces before measuring.
+    ///
+    /// Reference:
+    /// https://en.wikipedia.org/wiki/Tab_stop
     public enum Tab: Hashable, Sendable {
         case tabStops(Int)
         case fixedSpaces(Int)
