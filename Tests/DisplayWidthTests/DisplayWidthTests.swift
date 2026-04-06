@@ -273,6 +273,14 @@ func tsunodatahiro() async throws {
     #expect(displayWidth(apcST) == 5)
 }
 
+@Test func testANSIStringProcessingHandlesEmbeddedKittyAndOSCImagePayloads() throws {
+    let kitty = "\u{001B}_Ga=T,f=100;AAAA\u{001B}\\"
+    let iterm = "\u{001B}]1337;File=inline=1:AAAA\u{0007}"
+    let input = "ab" + kitty + "cd" + iterm + "ef"
+
+    #expect(DisplayWidth(stripsANSI: true)(input) == 6)
+}
+
 @Test func testMalformedANSISequenceDoesNotHangAndFallsBackToText() throws {
     let malformed = "\u{001B}]133;Ahello"
     #expect(DisplayWidth(stripsANSI: true)(malformed) == 11)
