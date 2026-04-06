@@ -22,7 +22,7 @@ public struct DisplayWidth: Hashable, Sendable {
         return measureProcessedString(string)
     }
 
-    private func measurePlainString(_ string: String) -> Int {
+    private func measurePlainString<S: StringProtocol>(_ string: S) -> Int {
         var totalWidth = 0
         for character in string {
             totalWidth += callAsFunction(character)
@@ -32,24 +32,32 @@ public struct DisplayWidth: Hashable, Sendable {
 
     private func measureProcessedString(_ string: String) -> Int {
         var totalWidth = 0
-        var index = string.startIndex
+        let scalars = string.unicodeScalars
+        var scalarIndex = scalars.startIndex
 
-        while index < string.endIndex {
-            if stripsANSI, let nextIndex = skipANSIEscapeSequence(in: string, from: index) {
-                index = nextIndex
+        while scalarIndex < scalars.endIndex {
+            let scalar = scalars[scalarIndex]
+
+            if stripsANSI,
+               scalar.value == 0x1B,
+               let nextScalarIndex = skipANSIEscapeSequence(in: scalars, from: scalarIndex) {
+                scalarIndex = nextScalarIndex
                 continue
             }
 
-            let character = string[index]
-            if let tabWidth, character == "\t" {
+            if let tabWidth, scalar.value == 0x09 {
                 let remainder = totalWidth % tabWidth
                 totalWidth += remainder == 0 ? tabWidth : tabWidth - remainder
-                index = string.index(after: index)
+                scalarIndex = scalars.index(after: scalarIndex)
                 continue
             }
 
-            totalWidth += callAsFunction(character)
-            index = string.index(after: index)
+            let segmentStart = scalarIndex
+            repeat {
+                scalarIndex = scalars.index(after: scalarIndex)
+            } while scalarIndex < scalars.endIndex && !isProcessingBoundary(scalars[scalarIndex])
+
+            totalWidth += measurePlainString(string[segmentStart..<scalarIndex])
         }
 
         return totalWidth
@@ -150,27 +158,31 @@ public struct DisplayWidth: Hashable, Sendable {
     }
 
     private func calculateGraphemeClusterWidth(_ character: Character) -> Int {
-        let scalars = Array(character.unicodeScalars)
-
-        // Handle flag sequences (two regional indicator symbols)
-        if scalars.count == 2 &&
-           scalars.allSatisfy({ isRegionalIndicator($0.value) }) {
-            return 2
-        }
-
-        // Handle emoji ZWJ sequences and other complex emoji
-        if containsEmoji(scalars) {
-            return 2
-        }
-
-        // For other multi-scalar grapheme clusters, use maximum width approach
-        // This handles base+combining marks correctly (combining marks are width 0)
+        var scalarCount = 0
+        var allRegionalIndicators = true
         var maxWidth = 0
-        for scalar in scalars {
-            let w = callAsFunction(scalar)
-            if w > maxWidth { maxWidth = w }
-            if maxWidth == 2 { break } // early-exit: cannot exceed 2 in our model
+        for scalar in character.unicodeScalars {
+            let codePoint = scalar.value
+            scalarCount += 1
+            allRegionalIndicators = allRegionalIndicators && isRegionalIndicator(codePoint)
+
+            if isEmojiComponent(codePoint) {
+                return 2
+            }
+
+            let width = callAsFunction(scalar)
+            if width > maxWidth {
+                maxWidth = width
+                if maxWidth == 2 && scalarCount > 2 {
+                    return 2
+                }
+            }
         }
+
+        if scalarCount == 2 && allRegionalIndicators {
+            return 2
+        }
+
         return maxWidth
     }
 
@@ -178,67 +190,77 @@ public struct DisplayWidth: Hashable, Sendable {
         return codePoint >= 0x1F1E6 && codePoint <= 0x1F1FF
     }
 
-    private func containsEmoji(_ scalars: [Unicode.Scalar]) -> Bool {
-        return scalars.contains { scalar in
-            let codePoint = scalar.value
-            return isWideSymbolOrEmoji(codePoint) ||
-                   (codePoint >= 0x1F3FB && codePoint <= 0x1F3FF) || // Skin tone modifiers
-                   codePoint == 0x200D || // ZWJ
-                   codePoint == 0xFE0F    // Emoji variation selector
-        }
+    private func isEmojiComponent(_ codePoint: UInt32) -> Bool {
+        return isWideSymbolOrEmoji(codePoint) ||
+               (codePoint >= 0x1F3FB && codePoint <= 0x1F3FF) || // Skin tone modifiers
+               codePoint == 0x200D || // ZWJ
+               codePoint == 0xFE0F    // Emoji variation selector
     }
 
-    private func skipANSIEscapeSequence(in string: String, from start: String.Index) -> String.Index? {
-        guard string[start] == "\u{001B}" else {
+    private func isProcessingBoundary(_ scalar: UnicodeScalar) -> Bool {
+        (stripsANSI && scalar.value == 0x1B) || (tabWidth != nil && scalar.value == 0x09)
+    }
+
+    private func skipANSIEscapeSequence(
+        in scalars: String.UnicodeScalarView,
+        from start: String.UnicodeScalarView.Index
+    ) -> String.UnicodeScalarView.Index? {
+        guard scalars[start].value == 0x1B else {
             return nil
         }
 
-        let introducerIndex = string.index(after: start)
-        guard introducerIndex < string.endIndex else {
+        let introducerIndex = scalars.index(after: start)
+        guard introducerIndex < scalars.endIndex else {
             return nil
         }
 
-        switch string[introducerIndex] {
-        case "[":
-            return skipControlSequenceIntroducer(in: string, from: string.index(after: introducerIndex))
-        case "]", "_":
-            return skipStringTerminatedEscape(in: string, from: string.index(after: introducerIndex))
+        switch scalars[introducerIndex].value {
+        case 0x5B: // [
+            return skipControlSequenceIntroducer(in: scalars, from: scalars.index(after: introducerIndex))
+        case 0x5D, 0x5F: // ], _
+            return skipStringTerminatedEscape(in: scalars, from: scalars.index(after: introducerIndex))
         default:
             return nil
         }
     }
 
-    private func skipControlSequenceIntroducer(in string: String, from start: String.Index) -> String.Index? {
+    private func skipControlSequenceIntroducer(
+        in scalars: String.UnicodeScalarView,
+        from start: String.UnicodeScalarView.Index
+    ) -> String.UnicodeScalarView.Index? {
         var index = start
 
-        while index < string.endIndex {
-            let scalar = string[index].unicodeScalars.first!.value
-            if scalar >= 0x40 && scalar <= 0x7E {
-                return string.index(after: index)
+        while index < scalars.endIndex {
+            let codePoint = scalars[index].value
+            if codePoint >= 0x40 && codePoint <= 0x7E {
+                return scalars.index(after: index)
             }
-            index = string.index(after: index)
+            index = scalars.index(after: index)
         }
 
         return nil
     }
 
-    private func skipStringTerminatedEscape(in string: String, from start: String.Index) -> String.Index? {
+    private func skipStringTerminatedEscape(
+        in scalars: String.UnicodeScalarView,
+        from start: String.UnicodeScalarView.Index
+    ) -> String.UnicodeScalarView.Index? {
         var index = start
 
-        while index < string.endIndex {
-            let character = string[index]
-            if character == "\u{0007}" {
-                return string.index(after: index)
+        while index < scalars.endIndex {
+            let codePoint = scalars[index].value
+            if codePoint == 0x07 { // BEL
+                return scalars.index(after: index)
             }
 
-            if character == "\u{001B}" {
-                let next = string.index(after: index)
-                if next < string.endIndex, string[next] == "\\" {
-                    return string.index(after: next)
+            if codePoint == 0x1B {
+                let next = scalars.index(after: index)
+                if next < scalars.endIndex, scalars[next].value == 0x5C { // \
+                    return scalars.index(after: next)
                 }
             }
 
-            index = string.index(after: index)
+            index = scalars.index(after: index)
         }
 
         return nil
