@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Clarified tab handling with the `DisplayWidth.Tab` enum API.
 - Improved README usage documentation for ANSI-aware and tab-aware measurement.
 - Optimized processed string measurement performance.
 
