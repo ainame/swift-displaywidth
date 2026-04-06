@@ -22,7 +22,9 @@ A portable/cross-platform Swift implementation of `wcwidth(3)` that calculates d
 
 **Main Public API** (`DisplayWidth.swift`):
 - Callable struct with `callAsFunction` for String/Character/UnicodeScalar
-- Configuration: `treatAmbiguousAsFullWidth` (default: false)
+- Configuration: `treatAmbiguousAsFullWidth`, `stripsANSI`, `tabWidth`
+- `stripsANSI` and `tabWidth` apply only to string measurement
+- `tabWidth` must be nil or greater than zero
 - Single-scalar fast path, complex grapheme cluster handling for emojis/combining marks
 
 **Width Calculation Flow**:
