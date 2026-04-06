@@ -294,5 +294,6 @@ func tsunodatahiro() async throws {
 @Test func testStringProcessingDoesNotAffectScalarOrCharacterMeasurement() throws {
     let displayWidth = DisplayWidth(stripsANSI: true, tabWidth: 4)
     #expect(displayWidth("\t" as Character) == 0)
+    #expect(displayWidth(Unicode.Scalar(0x001B)!) == 0)
     #expect(displayWidth("\u{001B}") == 0)
 }

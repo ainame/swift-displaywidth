@@ -43,21 +43,26 @@ Then:
 import DisplayWidth
 
 // call as function
-let displayWidth = DisplayWidth()
-displayWidth("A")        // 1
-displayWidth("あ")       // 2
-displayWidth("👩‍💻")       // 2
-displayWidth("e\u{0301}") // 1 (e + combining acute)
+let baseDisplayWidth = DisplayWidth()
+baseDisplayWidth("A")        // 1
+baseDisplayWidth("あ")       // 2
+baseDisplayWidth("👩‍💻")       // 2
+baseDisplayWidth("e\u{0301}") // 1 (e + combining acute)
 
 // If your environment treat ambiguous chars as full-width,
 // you can set this option.
-let displayWidth = DisplayWidth(treatAmbiguousAsFullWidth: true)
+let ambiguousWidth = DisplayWidth(treatAmbiguousAsFullWidth: true)
+```
+
+```swift
+import DisplayWidth
 
 // ANSI escape sequences can be ignored during string measurement.
 let ansiAwareDisplayWidth = DisplayWidth(stripsANSI: true)
 ansiAwareDisplayWidth("\u{001B}[31mhello\u{001B}[0m") // 5
 
 // Tabs can advance to real tab stops when measuring strings.
+// `tabWidth` must be a positive, non-zero value.
 let tabAwareDisplayWidth = DisplayWidth(tabWidth: 4)
 tabAwareDisplayWidth("a\tb") // 5
 ```

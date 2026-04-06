@@ -8,6 +8,7 @@ public struct DisplayWidth: Hashable, Sendable {
         stripsANSI: Bool = false,
         tabWidth: Int? = nil
     ) {
+        precondition(tabWidth == nil || tabWidth! > 0, "tabWidth must be nil or greater than zero")
         self.treatAmbiguousAsFullWidth = treatAmbiguousAsFullWidth
         self.stripsANSI = stripsANSI
         self.tabWidth = tabWidth
