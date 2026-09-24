@@ -8,13 +8,13 @@ import Testing
     let displayWidth = DisplayWidth()
 
     // Proto-Cuneiform numerals are neutral; Jurchen and Seal are wide.
-    #expect(displayWidth(Unicode.Scalar(0x12550)!) == 1)
+    #expect(displayWidth("𒕐" as Unicode.Scalar) == 1) // U+12550
     #expect(UnicodeData.isGeneralCategory(of: 0x12550, .letterNumber))
     #expect(UnicodeData.eastAsianWidth(for: 0x12550) == .neutral)
-    #expect(displayWidth(Unicode.Scalar(0x18E50)!) == 2)
+    #expect(displayWidth("𘹐" as Unicode.Scalar) == 2) // U+18E50
     #expect(UnicodeData.isGeneralCategory(of: 0x18E50, .otherLetter))
     #expect(UnicodeData.eastAsianWidth(for: 0x18E50) == .wide)
-    #expect(displayWidth(Unicode.Scalar(0x3D123)!) == 2)
+    #expect(displayWidth("𽄣" as Unicode.Scalar) == 2) // U+3D123
     #expect(UnicodeData.isGeneralCategory(of: 0x3D123, .otherLetter))
     #expect(UnicodeData.eastAsianWidth(for: 0x3D123) == .wide)
 }
@@ -22,19 +22,19 @@ import Testing
 @Test func unicode18NewMarks() {
     let displayWidth = DisplayWidth()
 
-    #expect(displayWidth(Unicode.Scalar(0x11DF0)!) == 0) // Bengali Supplement
-    #expect(displayWidth(Unicode.Scalar(0x1ADE)!) == 0) // Combining grave-dot
-    #expect(displayWidth(Unicode.Scalar(0x1D250)!) == 0) // Musical combining flag
+    #expect(displayWidth("𑷰" as Unicode.Scalar) == 0) // U+11DF0, Bengali Supplement
+    #expect(displayWidth("᫞" as Unicode.Scalar) == 0) // U+1ADE, combining grave-dot
+    #expect(displayWidth("𝉐" as Unicode.Scalar) == 0) // U+1D250, musical combining flag
     #expect(UnicodeData.isGeneralCategory(of: 0x1D250, .spacingCombiningMark))
 }
 
 @Test func unicode18NewSymbols() {
     let displayWidth = DisplayWidth()
 
-    #expect(displayWidth(Unicode.Scalar(0x1FAC8)!) == 2) // Hairy creature emoji
+    #expect(displayWidth("🫈" as Unicode.Scalar) == 2) // U+1FAC8, hairy creature emoji
     #expect(UnicodeData.isGeneralCategory(of: 0x1FAC8, .otherSymbol))
     #expect(UnicodeData.eastAsianWidth(for: 0x1FAC8) == .wide)
-    #expect(displayWidth(Unicode.Scalar(0x20C2)!) == 1) // Rufiyaa sign
+    #expect(displayWidth("⃂" as Unicode.Scalar) == 1) // U+20C2, Rufiyaa sign
     #expect(UnicodeData.isGeneralCategory(of: 0x20C2, .currencySymbol))
 }
 
