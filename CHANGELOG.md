@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### Changed
+
+- Updated the generated Unicode General Category and East Asian Width tables from Unicode 17.0.0 to 18.0.0. [#4](https://github.com/ainame/swift-displaywidth/pull/4)
+
+### Fixed
+
+- Made the Unicode data generator include every code point in `UnicodeData.txt` First/Last ranges, including the new Small Seal characters. [#4](https://github.com/ainame/swift-displaywidth/pull/4)
+
 ## [0.1.0] - 2026-04-06
 
 ### Added

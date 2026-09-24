@@ -9,8 +9,8 @@
 A portable/cross-platform implementation of `wcwidth(3)` with up-to-date Unicode spec.
 This project has own Unicode data tables generated from following files.
 
-* https://unicode.org/Public/17.0.0/ucd/UnicodeData.txt
-* https://unicode.org/Public/17.0.0/ucd/EastAsianWidth.txt
+* https://unicode.org/Public/18.0.0/ucd/UnicodeData.txt
+* https://unicode.org/Public/18.0.0/ucd/EastAsianWidth.txt
 
 ## Why use this?
 

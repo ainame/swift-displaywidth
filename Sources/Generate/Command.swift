@@ -17,7 +17,7 @@ struct UnicodeRange {
 
 @main
 struct Command {
-    static let unicodeVersion = "17.0.0"
+    static let unicodeVersion = "18.0.0"
 
     static func main() async throws {
         print("Downloading EastAsianWidth.txt...")
@@ -108,6 +108,7 @@ struct Command {
         }
 
         var ranges: [UnicodeRange] = []
+        var rangeStart: (codepoint: UInt32, name: String, category: String)?
 
         for line in content.components(separatedBy: .newlines) {
             let trimmedLine = line.trimmingCharacters(in: .whitespaces)
@@ -129,7 +130,26 @@ struct Command {
                 continue
             }
 
-            ranges.append(UnicodeRange(start: codepoint, end: codepoint, property: category, comment: name))
+            if name.hasSuffix(", First>") {
+                rangeStart = (codepoint, name, category)
+            } else if name.hasSuffix(", Last>") {
+                guard let first = rangeStart else {
+                    throw NSError(domain: "ParseError", code: 2, userInfo: [NSLocalizedDescriptionKey: "UnicodeData range end without start at \(codepoint)"])
+                }
+                guard first.category == category,
+                      first.name.replacingOccurrences(of: ", First>", with: "") ==
+                        name.replacingOccurrences(of: ", Last>", with: "") else {
+                    throw NSError(domain: "ParseError", code: 2, userInfo: [NSLocalizedDescriptionKey: "Mismatched UnicodeData range at \(codepoint)"])
+                }
+                ranges.append(UnicodeRange(start: first.codepoint, end: codepoint, property: category, comment: first.name))
+                rangeStart = nil
+            } else {
+                ranges.append(UnicodeRange(start: codepoint, end: codepoint, property: category, comment: name))
+            }
+        }
+
+        guard rangeStart == nil else {
+            throw NSError(domain: "ParseError", code: 3, userInfo: [NSLocalizedDescriptionKey: "Unterminated UnicodeData range"])
         }
 
         return ranges
