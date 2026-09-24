@@ -45,5 +45,9 @@ import Testing
     }
 
     // Existing paired ranges must remain complete after regeneration.
+    #expect(UnicodeData.isGeneralCategory(of: 0x3401, .otherLetter)) // CJK Extension A
+    #expect(UnicodeData.isGeneralCategory(of: 0xAC01, .otherLetter)) // Hangul syllables
     #expect(UnicodeData.isGeneralCategory(of: 0xE001, .privateUse))
+    #expect(DisplayWidth()("㐁" as Unicode.Scalar) == 2)
+    #expect(DisplayWidth()("각" as Unicode.Scalar) == 2)
 }
