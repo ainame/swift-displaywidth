@@ -20,6 +20,19 @@ import Foundation
     #expect(displayWidth("中") == 2) // CJK character
 }
 
+@Test func testUnicode18Data() throws {
+    let displayWidth = DisplayWidth()
+
+    // Newly assigned combining mark, emoji, and Small Seal characters.
+    #expect(displayWidth(Unicode.Scalar(0x1ADE)!) == 0)
+    #expect(displayWidth(Unicode.Scalar(0x1FAC8)!) == 2)
+    #expect(displayWidth(Unicode.Scalar(0x3D123)!) == 2)
+
+    // UnicodeData.txt represents Small Seal as a First/Last range.
+    #expect(UnicodeData.isGeneralCategory(of: 0x3D123, .otherLetter))
+    #expect(UnicodeData.isGeneralCategory(of: 0xE001, .privateUse))
+}
+
 @Test
 func tsunodatahiro() async throws {
     #expect(DisplayWidth(treatAmbiguousAsFullWidth: true)("つのだ☆HIRO") == 12)

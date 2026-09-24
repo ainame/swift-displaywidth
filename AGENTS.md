@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-A portable/cross-platform Swift implementation of `wcwidth(3)` that calculates display width of Unicode characters and strings. Uses up-to-date Unicode 17.0.0 spec with better grapheme cluster support than system `wcwidth`. No dependencies on C libraries or Foundation (except for locale-aware variant).
+A portable/cross-platform Swift implementation of `wcwidth(3)` that calculates display width of Unicode characters and strings. Uses up-to-date Unicode 18.0.0 spec with better grapheme cluster support than system `wcwidth`. No dependencies on C libraries or Foundation (except for locale-aware variant).
 
 **Swift Version**: 6.0 (see `.swift-version`)
 
